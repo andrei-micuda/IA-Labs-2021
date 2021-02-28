@@ -9,14 +9,16 @@ class Node(metaclass=abc.ABCMeta):
         parent (Node): The parent of the current node (or None if the current node does not have a parent)
     """
 
-    def __init__(self, info, parent):
+    def __init__(self, info, parent, cost=1):
         """
         Args:
             info (object): The information to be stored in the new node
             parent (Node): Node to be assigned as the parent of the new node
+            cost (int): The cost associated with the path to the current node in the traversal tree
         """
         self.info = info
         self.parent = parent
+        self.cost = cost
 
     def getPath(self):
         """Method that retrieves the path from the root to the current node
@@ -32,7 +34,7 @@ class Node(metaclass=abc.ABCMeta):
 
         return path
 
-    def printPath(self, printLength=False):
+    def printPath(self, printLength=False, printCost=False):
         """Method that prints the path from the root to the current node
         Args:
             printLength (bool): Whether to print the path's length or not
@@ -46,6 +48,9 @@ class Node(metaclass=abc.ABCMeta):
 
         if printLength:
             print(f'Length: {len(lst) - 1}')
+
+        if printCost:
+            print(f'Cost: {self.cost}')
 
         return len(lst)
 

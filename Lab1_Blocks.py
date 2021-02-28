@@ -1,6 +1,4 @@
 import copy
-import sys
-sys.path.append("..")
 
 from libs.TraversalTree.Node import Node as AbstractNode
 from libs.TraversalTree.Graph import Graph as AbstractGraph
@@ -84,6 +82,7 @@ class Graph(AbstractGraph):
     def generateSuccessors(self, currentNode):
         """A method that generates all possible next states based on the current one.
         We take each block that is on top of a stack and we move it on top of all the other stacks.
+        The cost for each move is the alphabetical index associated with the block's label
 
         Args:
             currentNode (Node)
@@ -108,7 +107,8 @@ class Graph(AbstractGraph):
                 newStacks = copy.deepcopy(tempStacks)
                 newStacks[j].append(blockToMove)
                 if not currentNode.containsInPath(newStacks):
-                    newNode = Node(newStacks, currentNode)
+                    newNode = Node(
+                        newStacks, currentNode, currentNode.cost + ord(blockToMove) - ord('a') + 1)
                     lstSucc.append(newNode)
 
         return lstSucc
@@ -172,6 +172,39 @@ def depthFirst(graph, currentNode, depth, numOfSolutions):
     return numOfSolutions
 
 
+def uniformCostSearch(graph, numOfSolutions):
+    queue = [Node(graph.start, None, 0)]
+
+    while len(queue) > 0:
+        currentNode = queue.pop(0)
+
+        if graph.testScope(currentNode):
+            print("Solution!")
+            currentNode.printPath(printLength=True, printCost=True)
+            print("================================\n")
+            numOfSolutions -= 1
+            input()
+
+            if numOfSolutions == 0:
+                return
+
+        succ = graph.generateSuccessors(currentNode)
+
+        # we insert each new node in the correct position in order to keep the queue sorted
+        for s in succ:
+            i = 0
+            foundPos = False
+            for i in range(len(queue)):
+                if queue[i].cost > s.cost:
+                    foundPos = True
+                    break
+
+            if foundPos:
+                queue.insert(i, s)
+            else:
+                queue.append(s)
+
+
 with open("lab1.txt") as fin:
     data = fin.read()
 
@@ -179,3 +212,4 @@ g = Graph(data)
 print(g)
 # breadthFirst(g, numOfSolutions=3)
 # iterativeDepthFirst(g, maxDepth=5, numOfSolutions=4)
+uniformCostSearch(g, numOfSolutions=5)
