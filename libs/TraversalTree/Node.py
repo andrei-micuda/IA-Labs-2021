@@ -7,9 +7,12 @@ class Node(metaclass=abc.ABCMeta):
     Attributes:
         info (object): The information that the current state
         parent (Node): The parent of the current node (or None if the current node does not have a parent)
+        cost (Int): The cost of the path from the start node to the current node
+        heuristic (Int): The approximate cost from the current node to a scope state
+        pathCost (Int): The approximate cost of the path from the start node to a scope state going through the current known path
     """
 
-    def __init__(self, info, parent, cost=1):
+    def __init__(self, info, parent, cost=1, heuristic=1):
         """
         Args:
             info (object): The information to be stored in the new node
@@ -19,6 +22,8 @@ class Node(metaclass=abc.ABCMeta):
         self.info = info
         self.parent = parent
         self.cost = cost
+        self.heuristic = heuristic
+        self.pathCost = self.cost + self.heuristic
 
     def getPath(self):
         """Method that retrieves the path from the root to the current node

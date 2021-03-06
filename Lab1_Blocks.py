@@ -205,7 +205,7 @@ def uniformCostSearch(graph, numOfSolutions):
                 queue.append(s)
 
 
-with open("lab1.txt") as fin:
+with open("blocks.txt") as fin:
     data = fin.read()
 
 g = Graph(data)
