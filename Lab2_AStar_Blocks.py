@@ -79,7 +79,7 @@ class Graph(AbstractGraph):
         """
         return currentNode.info in self.scopes
 
-    def generateSuccessors(self, currentNode):
+    def generateSuccessors(self, currentNode, heuristicType):
         """A method that generates all possible next states based on the current one.
         We take each block that is on top of a stack and we move it on top of all the other stacks.
         The cost for each move is the alphabetical index associated with the block's label
@@ -108,7 +108,7 @@ class Graph(AbstractGraph):
                 newStacks[j].append(blockToMove)
                 if not currentNode.containsInPath(newStacks):
                     newNode = Node(
-                        newStacks, currentNode, currentNode.cost + ord(blockToMove) - ord('a') + 1)
+                        newStacks, currentNode, currentNode.cost + ord(blockToMove) - ord('a') + 1, self.calcHeuristic(newStacks, heuristicType))
                     lstSucc.append(newNode)
 
         return lstSucc
@@ -128,7 +128,7 @@ class Graph(AbstractGraph):
             blocks.extend(st)
         return blocks
 
-    def calcHeuristics(self, nodeInfo, heuristicType):
+    def calcHeuristic(self, nodeInfo, heuristicType):
         """Given a node's info and an heuristic type we calculate the heuristic for the current node
 
         Args:
@@ -186,15 +186,16 @@ class Graph(AbstractGraph):
         """
 
         heuristicCost = self.calculateHeuristicCost1(
-            nodeInfo, self.scopes[0].info)
+            nodeInfo, self.scopes[0])
 
         for scope in self.scopes:
             heuristicCost = min(heuristicCost, self.calculateHeuristicCost1(
-                nodeInfo, scope.info))
+                nodeInfo, scope))
+
+        return heuristicCost
 
     def calculateHeuristicCost2(self, nodeInfo, scopeInfo):
         heuristicCost = 0
-
         for block in self.getBlocksLabels():
             foundIndexInNode = False
             indexInNode = 0
@@ -212,7 +213,7 @@ class Graph(AbstractGraph):
                     break
                 indexInScope += 1
 
-            if indexInNode != indexInScope:
+            if indexInNode != indexInScope or nodeInfo[indexInNode].index(block) != scopeInfo[indexInScope].index(block):
                 heuristicCost += ord(block) - ord('a') + 1
 
         return heuristicCost
@@ -225,11 +226,13 @@ class Graph(AbstractGraph):
         un pas de costul respectiv).
         """
         heuristicCost = self.calculateHeuristicCost2(
-            nodeInfo, self.scopes[0].info)
+            nodeInfo, self.scopes[0])
 
         for scope in self.scopes:
             heuristicCost = min(heuristicCost, self.calculateHeuristicCost2(
-                nodeInfo, scope.info))
+                nodeInfo, scope))
+
+        return heuristicCost
 
 
 def aStar(graph, heuristicType):
@@ -246,7 +249,7 @@ def aStar(graph, heuristicType):
             print("================================\n")
             return
 
-        succ = graph.generateSuccessors(currentNode)
+        succ = graph.generateSuccessors(currentNode, heuristicType)
         succCopy = succ.copy()
 
         # we insert each new node in the correct position in order to keep the open queue sorted, based on the minimum approximate cost of the path to a scope
